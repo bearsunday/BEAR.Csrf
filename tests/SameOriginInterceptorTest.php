@@ -37,6 +37,12 @@ final class SameOriginInterceptorTest extends TestCase
         $this->assertSame('proceeded', $this->invoke(new FakeRequestOrigin(origin: 'https://example.com:443')));
     }
 
+    /** Scheme and host compare case-insensitively per RFC 3986. */
+    public function testOriginCaseIsIgnoredWhenComparing(): void
+    {
+        $this->assertSame('proceeded', $this->invoke(new FakeRequestOrigin(origin: 'HTTPS://EXAMPLE.COM')));
+    }
+
     public function testRefererSameOriginProceeds(): void
     {
         $this->assertSame('proceeded', $this->invoke(new FakeRequestOrigin(referer: 'https://example.com/admin/edit?id=1')));
