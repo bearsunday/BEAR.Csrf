@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Attribute;
+namespace BEAR\Csrf\Attribute;
 
 use Attribute;
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Fake;
+namespace BEAR\Csrf\Fake;
 
 use InvalidArgumentException;
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 final class FakeCsrfToken implements CsrfTokenInterface
 {

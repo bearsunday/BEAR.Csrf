@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
+use BEAR\Csrf\Http\AllowedOrigin;
+use BEAR\Csrf\Http\CompositeRequestToken;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\HeaderRequestToken;
+use BEAR\Csrf\Http\PostRequestToken;
+use BEAR\Csrf\Http\RequestOriginInterface;
+use BEAR\Csrf\Http\RequestTokenInterface;
+use BEAR\Csrf\Http\ResourceQueryRequestToken;
+use BEAR\Csrf\Http\ServerRequestOrigin;
+use BEAR\Csrf\Interceptor\CsrfTokenInterceptor;
+use BEAR\Csrf\Interceptor\SameOriginInterceptor;
 use BEAR\Resource\ResourceObject;
 use Override;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Attribute\SameOrigin;
-use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Http\CompositeRequestToken;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\HeaderRequestToken;
-use Ray\Csrf\Http\PostRequestToken;
-use Ray\Csrf\Http\RequestOriginInterface;
-use Ray\Csrf\Http\RequestTokenInterface;
-use Ray\Csrf\Http\ResourceQueryRequestToken;
-use Ray\Csrf\Http\ServerRequestOrigin;
-use Ray\Csrf\Interceptor\CsrfTokenInterceptor;
-use Ray\Csrf\Interceptor\SameOriginInterceptor;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 

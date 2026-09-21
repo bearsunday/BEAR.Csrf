@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Fake;
+namespace BEAR\Csrf\Fake;
 
 use BEAR\Resource\ResourceObject;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Attribute\SameOrigin;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 
 final class FakeResource extends ResourceObject
 {

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Fake\FakeInvocation;
+use BEAR\Csrf\Fake\FakeResource;
+use BEAR\Csrf\Fake\FakeUri;
+use BEAR\Csrf\Http\CompositeRequestToken;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\HeaderRequestToken;
+use BEAR\Csrf\Http\PostRequestToken;
+use BEAR\Csrf\Http\ResourceQueryRequestToken;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Fake\FakeInvocation;
-use Ray\Csrf\Fake\FakeResource;
-use Ray\Csrf\Fake\FakeUri;
-use Ray\Csrf\Http\CompositeRequestToken;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\HeaderRequestToken;
-use Ray\Csrf\Http\PostRequestToken;
-use Ray\Csrf\Http\ResourceQueryRequestToken;
 use stdClass;
 
 final class RequestTokenTest extends TestCase

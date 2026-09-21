@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
 interface CsrfTokenInterface
 {

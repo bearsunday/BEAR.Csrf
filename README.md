@@ -1,8 +1,12 @@
-# Ray.Csrf
+# BEAR.Csrf
 
-CSRF protection for Ray.Di / BEAR.Resource applications.
+CSRF protection for BEAR.Sunday.
 
-`ray/csrf` keeps CSRF outside the Resource semantic contract: Resource method
+The gates are bound by AOP onto `ResourceObject` methods, and a rejection is a
+`BEAR\Resource` 4xx exception, so the framework's own error pipeline serves the
+response. That coupling is deliberate, and it is why this is a `bear/` package.
+
+`bear/csrf` keeps CSRF outside the Resource semantic contract: Resource method
 parameters do not need a CSRF token, and request schemas / API documentation do
 not need to expose it. Browser-facing unsafe methods are protected by Ray AOP
 interceptors.
@@ -10,7 +14,7 @@ interceptors.
 ## Installation
 
 ```bash
-composer require ray/csrf
+composer require bear/csrf
 ```
 
 ## Module
@@ -19,7 +23,7 @@ Install `CsrfModule` in your application module. Which gates run is chosen by
 name, so a deployment cannot end up unprotected by leaving an argument out:
 
 ```php
-use Ray\Csrf\CsrfModule;
+use BEAR\Csrf\CsrfModule;
 
 $this->install(CsrfModule::withSameOriginCheck('https://example.com'));
 ```
@@ -46,8 +50,8 @@ $this->install(CsrfModule::withSameOriginCheck(
 ## Resource attributes
 
 ```php
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\Attribute\SameOrigin;
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\Attribute\SameOrigin;
 
 final class Article extends ResourceObject
 {

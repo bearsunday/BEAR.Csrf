@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Fake;
+namespace BEAR\Csrf\Fake;
 
 use Override;
-use Ray\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\CsrfTokenInterface;
 
 /** Records what the interceptor submitted, and accepts or rejects on command. */
 final class RecordingCsrfToken implements CsrfTokenInterface

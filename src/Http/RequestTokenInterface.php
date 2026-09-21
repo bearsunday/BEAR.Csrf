@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Http;
+namespace BEAR\Csrf\Http;
 
 use Ray\Aop\MethodInvocation;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Fake;
+namespace BEAR\Csrf\Fake;
 
 use Override;
-use Ray\Csrf\Http\RequestOriginInterface;
+use BEAR\Csrf\Http\RequestOriginInterface;
 
 final readonly class FakeRequestOrigin implements RequestOriginInterface
 {

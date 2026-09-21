@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Fake;
+namespace BEAR\Csrf\Fake;
 
 use ArrayObject;
 use Override;

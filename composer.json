@@ -1,5 +1,5 @@
 {
-    "name": "ray/csrf",
+    "name": "bear/csrf",
     "description": "CSRF protection module for Ray.Di / BEAR.Resource applications",
     "license": "MIT",
     "authors": [
@@ -21,12 +21,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Ray\\Csrf\\": "src/"
+            "BEAR\\Csrf\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Ray\\Csrf\\": [
+            "BEAR\\Csrf\\": [
                 "tests",
                 "tests/Fake"
             ]

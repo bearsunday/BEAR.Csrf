@@ -36,6 +36,6 @@ method signature.
   store therefore throws `CoroutineUnsafeStoreException` rather than let a
   deployment believe it is protected. Running there requires binding
   `CsrfTokenInterface` to a request-scoped store; the package does not yet ship
-  one ([#7](https://github.com/ray-di/Ray.Csrf/issues/7)).
+  one ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
 
-[0.1.0]: https://github.com/ray-di/Ray.Csrf/releases/tag/0.1.0
+[0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0

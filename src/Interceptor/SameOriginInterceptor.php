@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Interceptor;
+namespace BEAR\Csrf\Interceptor;
 
+use BEAR\Csrf\Exception\CrossOriginForbiddenException;
+use BEAR\Csrf\Exception\LogicException;
+use BEAR\Csrf\Http\AllowedOrigin;
+use BEAR\Csrf\Http\RequestOriginInterface;
 use BEAR\Resource\Exception\BadRequestException;
 use Override;
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\MethodInvocation;
-use Ray\Csrf\Exception\CrossOriginForbiddenException;
-use Ray\Csrf\Exception\LogicException;
-use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Http\RequestOriginInterface;
 
 use function array_intersect_key;
 use function array_key_exists;

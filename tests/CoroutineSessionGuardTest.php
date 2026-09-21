@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Exception\CoroutineUnsafeStoreException;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Exception\CoroutineUnsafeStoreException;
 use Swoole\Coroutine;
 use Throwable;
 

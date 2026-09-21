@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Http\CsrfTokenField;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Http\CsrfTokenField;
 
 final class CsrfTokenFieldTest extends TestCase
 {

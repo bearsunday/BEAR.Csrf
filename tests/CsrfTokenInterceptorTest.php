@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Exception\InvalidCsrfTokenForbiddenException;
+use BEAR\Csrf\Exception\LogicException;
+use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
+use BEAR\Csrf\Fake\FakeCsrfToken;
+use BEAR\Csrf\Fake\FakeInvocation;
+use BEAR\Csrf\Fake\FakeResource;
+use BEAR\Csrf\Fake\FakeUri;
+use BEAR\Csrf\Fake\RecordingCsrfToken;
+use BEAR\Csrf\Http\CompositeRequestToken;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\HeaderRequestToken;
+use BEAR\Csrf\Http\PostRequestToken;
+use BEAR\Csrf\Http\ResourceQueryRequestToken;
+use BEAR\Csrf\Interceptor\CsrfTokenInterceptor;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Exception\InvalidCsrfTokenForbiddenException;
-use Ray\Csrf\Exception\LogicException;
-use Ray\Csrf\Exception\MissingCsrfTokenForbiddenException;
-use Ray\Csrf\Fake\FakeCsrfToken;
-use Ray\Csrf\Fake\FakeInvocation;
-use Ray\Csrf\Fake\FakeResource;
-use Ray\Csrf\Fake\FakeUri;
-use Ray\Csrf\Fake\RecordingCsrfToken;
-use Ray\Csrf\Http\CompositeRequestToken;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\HeaderRequestToken;
-use Ray\Csrf\Http\PostRequestToken;
-use Ray\Csrf\Http\ResourceQueryRequestToken;
-use Ray\Csrf\Interceptor\CsrfTokenInterceptor;
 
 final class CsrfTokenInterceptorTest extends TestCase
 {

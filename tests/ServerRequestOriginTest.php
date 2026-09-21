@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Http\ServerRequestOrigin;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Http\ServerRequestOrigin;
 
 final class ServerRequestOriginTest extends TestCase
 {

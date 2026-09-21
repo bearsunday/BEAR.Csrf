@@ -18,6 +18,16 @@ jobs:
           - '8.2'
           - '8.3'
           - '8.4'
+        # SessionCsrfToken's coroutine guard has a branch for each answer to "is Swoole
+        # loaded?". One leg without the extension keeps the absent branch reachable; with it
+        # on every leg, the guard's early return is dead code and coverage never reaches 100%.
+        include:
+          - php-version: '8.2'
+            extensions: ''
+          - php-version: '8.3'
+            extensions: swoole
+          - php-version: '8.4'
+            extensions: swoole
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,9 +36,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          # The coroutine guard in SessionCsrfToken is only exercised where Swoole is
-          # present; without it that test silently skips and the guard is never run.
-          extensions: swoole
+          extensions: ${{ matrix.extensions }}
           coverage: pcov
           tools: none
           ini-values: assert.exception=1, zend.assertions=1

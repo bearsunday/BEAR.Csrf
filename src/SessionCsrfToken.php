@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Exception\CoroutineUnsafeStoreException;
 use Override;
-use Ray\Csrf\Exception\CoroutineUnsafeStoreException;
 
 use function bin2hex;
 use function call_user_func;

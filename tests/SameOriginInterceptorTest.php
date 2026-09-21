@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf;
+namespace BEAR\Csrf;
 
+use BEAR\Csrf\Exception\CrossOriginForbiddenException;
+use BEAR\Csrf\Exception\LogicException;
+use BEAR\Csrf\Fake\FakeInvocation;
+use BEAR\Csrf\Fake\FakeRequestOrigin;
+use BEAR\Csrf\Fake\FakeResource;
+use BEAR\Csrf\Http\AllowedOrigin;
+use BEAR\Csrf\Interceptor\SameOriginInterceptor;
 use BEAR\Resource\Exception\BadRequestException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Ray\Csrf\Exception\CrossOriginForbiddenException;
-use Ray\Csrf\Exception\LogicException;
-use Ray\Csrf\Fake\FakeInvocation;
-use Ray\Csrf\Fake\FakeRequestOrigin;
-use Ray\Csrf\Fake\FakeResource;
-use Ray\Csrf\Http\AllowedOrigin;
-use Ray\Csrf\Interceptor\SameOriginInterceptor;
 
 final class SameOriginInterceptorTest extends TestCase
 {

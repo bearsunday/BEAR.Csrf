@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Exception;
+namespace BEAR\Csrf\Exception;
 
 use LogicException;
 
@@ -16,7 +16,7 @@ use LogicException;
  * invisible from the outside — requests succeed — so the store refuses to run
  * rather than let a deployment believe it is protected.
  *
- * Bind {@see \Ray\Csrf\CsrfTokenInterface} to a store scoped to the request
+ * Bind {@see \BEAR\Csrf\CsrfTokenInterface} to a store scoped to the request
  * (coroutine context, or a shared backend keyed by the session id).
  */
 final class CoroutineUnsafeStoreException extends LogicException

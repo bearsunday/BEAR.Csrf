@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Ray\Csrf\Interceptor;
+namespace BEAR\Csrf\Interceptor;
 
+use BEAR\Csrf\Attribute\CsrfToken;
+use BEAR\Csrf\CsrfTokenInterface;
+use BEAR\Csrf\Exception\InvalidCsrfTokenForbiddenException;
+use BEAR\Csrf\Exception\LogicException;
+use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
+use BEAR\Csrf\Http\CsrfTokenField;
+use BEAR\Csrf\Http\RequestTokenInterface;
 use Override;
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\MethodInvocation;
-use Ray\Csrf\Attribute\CsrfToken;
-use Ray\Csrf\CsrfTokenInterface;
-use Ray\Csrf\Exception\InvalidCsrfTokenForbiddenException;
-use Ray\Csrf\Exception\LogicException;
-use Ray\Csrf\Exception\MissingCsrfTokenForbiddenException;
-use Ray\Csrf\Http\CsrfTokenField;
-use Ray\Csrf\Http\RequestTokenInterface;
 
 use function sprintf;
 
