@@ -36,7 +36,7 @@ than protect it. Say so explicitly; the token gate stays on either way:
 $this->install(CsrfModule::withoutSameOriginCheck());
 ```
 
-`tokenField` defaults to `_csrf_token` and `sessionKey` to `ray_csrf_token`.
+`tokenField` defaults to `_csrf_token` and `sessionKey` to `bear_csrf_token`.
 Override either when an existing wire name or session layout requires it:
 
 ```php

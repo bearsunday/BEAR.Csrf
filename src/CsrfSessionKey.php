@@ -18,7 +18,7 @@ use InvalidArgumentException;
 final readonly class CsrfSessionKey
 {
     /** Default session key shared with {@see CsrfModule}. */
-    public const DEFAULT_NAME = 'ray_csrf_token';
+    public const DEFAULT_NAME = 'bear_csrf_token';
 
     public function __construct(
         public string $name = self::DEFAULT_NAME,
