@@ -32,12 +32,16 @@ final readonly class CsrfTokenInterceptor implements MethodInterceptor
     {
         $field = $this->field($invocation);
         $submitted = $this->requestToken->submitted($invocation, $field);
-        if ($submitted === null) {
-            throw new MissingCsrfTokenForbiddenException();
-        }
 
-        if (! $this->csrf->verify($submitted)) {
-            throw new InvalidCsrfTokenForbiddenException();
+        // A missing token is still submitted to the bound CsrfTokenInterface, as ''. Rejecting
+        // it here would make the interceptor, not the port, the final authority — and a
+        // consumer wanting a permissive token for tests whose subject is not CSRF would have
+        // to replace the interceptor rather than bind an implementation. The two exceptions
+        // distinguish the cases for diagnosis; both are 403.
+        if (! $this->csrf->verify($submitted ?? '')) {
+            throw $submitted === null
+                ? new MissingCsrfTokenForbiddenException()
+                : new InvalidCsrfTokenForbiddenException();
         }
 
         return $invocation->proceed();

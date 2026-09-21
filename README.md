@@ -15,22 +15,32 @@ composer require ray/csrf
 
 ## Module
 
-Install `CsrfModule` in your application module:
+Install `CsrfModule` in your application module. Which gates run is chosen by
+name, so a deployment cannot end up unprotected by leaving an argument out:
 
 ```php
 use Ray\Csrf\CsrfModule;
 
-$this->install(new CsrfModule(
-    allowedOrigin: 'https://example.com',
-    tokenField: '_csrf_token',
-));
+$this->install(CsrfModule::withSameOriginCheck('https://example.com'));
 ```
 
-`tokenField` defaults to `_csrf_token`. Applications with an existing wire name
-can override it, for example BeMart uses `csrfToken`:
+For a host with no browser origin to compare against — a CLI or a
+machine-to-machine API — the origin gate would reject every request rather
+than protect it. Say so explicitly; the token gate stays on either way:
 
 ```php
-$this->install(new CsrfModule(tokenField: 'csrfToken'));
+$this->install(CsrfModule::withoutSameOriginCheck());
+```
+
+`tokenField` defaults to `_csrf_token` and `sessionKey` to `ray_csrf_token`.
+Override either when an existing wire name or session layout requires it:
+
+```php
+$this->install(CsrfModule::withSameOriginCheck(
+    allowedOrigin: 'https://example.com',
+    tokenField: 'csrfToken',
+    sessionKey: 'cms_csrf_token',
+));
 ```
 
 ## Resource attributes
@@ -53,16 +63,20 @@ final class Article extends ResourceObject
 ```
 
 `#[SameOrigin]` validates browser origin signals (`Sec-Fetch-Site`, `Origin`,
-`Referer`). If `allowedOrigin` is `null`, only this origin gate is skipped.
+`Referer`), and runs only under `withSameOriginCheck()`.
 
 When `Sec-Fetch-Site` is present (all modern browsers send it), the request is
-judged by that browser-computed signal alone and `allowedOrigin` is not
-compared. `allowedOrigin` is consulted only for the `Origin` / `Referer`
-fallback used by older or non-browser clients.
+judged by that browser-computed signal alone and the allowed origin is not
+compared. It is consulted only for the `Origin` / `Referer` fallback used by
+older or non-browser clients.
 
-`#[CsrfToken]` validates a synchroniser token and is not disabled by
-`allowedOrigin: null`. Tests and fake contexts should override
-`CsrfTokenInterface` when they do not drive real HTTP form submissions.
+`#[CsrfToken]` validates a synchroniser token. The two gates are independent
+defences: `withoutSameOriginCheck()` does not affect this one.
+
+A missing token is submitted to `CsrfTokenInterface::verify()` as `''` rather
+than rejected by the interceptor, so the bound implementation is the only
+authority on what is acceptable. A test whose subject is not CSRF binds a
+permissive implementation; it does not have to replace the interceptor.
 
 ## Token sources
 
@@ -110,3 +124,21 @@ session_regenerate_id(true);
 $csrf->clear();   // drop the old token
 $csrf->issue();   // mint a fresh token for the new session
 ```
+
+## Supported hosts
+
+The bundled `SessionCsrfToken` keeps the token in PHP's `$_SESSION`, which
+belongs to the process. That is correct where a request owns its process —
+PHP-FPM, mod_php, the built-in server, CLI.
+
+Under a coroutine host such as Swoole one worker serves several requests at
+once, so a single `$_SESSION` would be shared between concurrent visitors: an
+attacker's forged request would carry a token the server accepts. Nothing about
+that is visible from the outside, since every request still succeeds, so
+`SessionCsrfToken` throws `CoroutineUnsafeStoreException` when it detects it is
+running inside a coroutine rather than let a deployment believe it is
+protected.
+
+To run there, bind `CsrfTokenInterface` to a store scoped to the request —
+coroutine context, or a shared backend keyed by the session id. Everything else
+in this package is stateless and unaffected.

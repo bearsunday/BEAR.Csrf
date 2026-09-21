@@ -12,6 +12,7 @@ use Ray\Csrf\Fake\FakeCsrfToken;
 use Ray\Csrf\Fake\FakeInvocation;
 use Ray\Csrf\Fake\FakeResource;
 use Ray\Csrf\Fake\FakeUri;
+use Ray\Csrf\Fake\RecordingCsrfToken;
 use Ray\Csrf\Http\CompositeRequestToken;
 use Ray\Csrf\Http\CsrfTokenField;
 use Ray\Csrf\Http\HeaderRequestToken;
@@ -73,10 +74,40 @@ final class CsrfTokenInterceptorTest extends TestCase
         $this->interceptor()->invoke(new FakeInvocation(new FakeResource(), 'onGet'));
     }
 
-    private function interceptor(): CsrfTokenInterceptor
+    /**
+     * The bound implementation, not the interceptor, decides whether a request is acceptable.
+     * A consumer whose tests are not about CSRF binds a permissive token; if the interceptor
+     * rejected the missing case itself, that binding would have no effect and the consumer
+     * would have to replace the interceptor.
+     */
+    public function testMissingTokenIsDecidedByTheBoundImplementation(): void
+    {
+        $invocation = new FakeInvocation(new FakeResource(), 'onPost');
+        $permissive = new RecordingCsrfToken(accepts: true);
+
+        $actual = $this->interceptor($permissive)->invoke($invocation);
+
+        $this->assertSame('proceeded', $actual);
+        $this->assertSame([''], $permissive->verified);
+    }
+
+    /** A missing token reaches verify() as '' rather than bypassing it. */
+    public function testMissingTokenIsSubmittedAsEmptyString(): void
+    {
+        $recording = new RecordingCsrfToken();
+
+        try {
+            $this->interceptor($recording)->invoke(new FakeInvocation(new FakeResource(), 'onPost'));
+            $this->fail('Expected the request to be forbidden.');
+        } catch (MissingCsrfTokenForbiddenException) {
+            $this->assertSame([''], $recording->verified);
+        }
+    }
+
+    private function interceptor(CsrfTokenInterface|null $csrf = null): CsrfTokenInterceptor
     {
         return new CsrfTokenInterceptor(
-            new FakeCsrfToken('valid-token'),
+            $csrf ?? new FakeCsrfToken('valid-token'),
             new CompositeRequestToken(new HeaderRequestToken(), new ResourceQueryRequestToken(), new PostRequestToken()),
             new CsrfTokenField(),
         );

@@ -15,7 +15,7 @@ final class TestCsrfModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $this->install(new CsrfModule(allowedOrigin: 'https://example.com'));
+        $this->install(CsrfModule::withSameOriginCheck('https://example.com'));
         $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
     }
 }
