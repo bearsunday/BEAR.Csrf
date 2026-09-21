@@ -1,6 +1,6 @@
 {
     "name": "bear/csrf",
-    "description": "CSRF protection module for Ray.Di / BEAR.Resource applications",
+    "description": "CSRF protection for BEAR.Sunday",
     "license": "MIT",
     "authors": [
         {

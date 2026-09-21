@@ -132,17 +132,24 @@ $csrf->issue();   // mint a fresh token for the new session
 ## Supported hosts
 
 The bundled `SessionCsrfToken` keeps the token in PHP's `$_SESSION`, which
-belongs to the process. That is correct where a request owns its process —
+belongs to the process. It is correct only where a request owns its process —
 PHP-FPM, mod_php, the built-in server, CLI.
 
-Under a coroutine host such as Swoole one worker serves several requests at
-once, so a single `$_SESSION` would be shared between concurrent visitors: an
-attacker's forged request would carry a token the server accepts. Nothing about
-that is visible from the outside, since every request still succeeds, so
-`SessionCsrfToken` throws `CoroutineUnsafeStoreException` when it detects it is
-running inside a coroutine rather than let a deployment believe it is
-protected.
+**On any host that serves several requests from one persistent worker, do not
+use it.** `$_SESSION` outlives the request there, so every visitor of that
+worker shares one token and a forged request carries a token the server
+accepts. This does not weaken CSRF protection, it removes it, and nothing is
+visible from the outside because every request still succeeds. Measured on a
+Swoole 6.2 HTTP server with `enable_coroutine` off: three clients with no
+cookies all received the same token.
 
-To run there, bind `CsrfTokenInterface` to a store scoped to the request —
+`SessionCsrfToken` throws `CoroutineUnsafeStoreException` when it finds itself
+inside a coroutine, which covers coroutine hosts. **It cannot detect the
+non-coroutine case** — a Swoole worker with `enable_coroutine` off reports no
+coroutine id, and the extension exposes no way to ask whether a server is
+running. Treat the guard as catching one shape of the mistake, not as
+permission to deploy the bundled store on a persistent-worker host.
+
+On such a host, bind `CsrfTokenInterface` to a store scoped to the request —
 coroutine context, or a shared backend keyed by the session id. Everything else
 in this package is stateless and unaffected.

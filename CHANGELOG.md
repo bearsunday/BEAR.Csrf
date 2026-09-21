@@ -29,13 +29,20 @@ method signature.
 
 ### Known limitations
 
-- `SessionCsrfToken` assumes a host where a request owns its process (PHP-FPM,
-  mod_php, the built-in server, CLI). Under a coroutine host such as Swoole one
-  worker's visitors would share a single token, which removes CSRF protection
-  rather than weakening it — invisibly, since every request still succeeds. The
-  store therefore throws `CoroutineUnsafeStoreException` rather than let a
-  deployment believe it is protected. Running there requires binding
-  `CsrfTokenInterface` to a request-scoped store; the package does not yet ship
-  one ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
+- `SessionCsrfToken` requires a host where a request owns its process (PHP-FPM,
+  mod_php, the built-in server, CLI). On any host serving several requests from
+  one persistent worker, `$_SESSION` outlives the request and every visitor of
+  that worker shares one token — CSRF protection removed rather than weakened,
+  and invisible from the outside because every request still succeeds.
+  Reproduced on Swoole 6.2 with `enable_coroutine` off: three cookie-less
+  clients received the same token.
+
+  The store throws `CoroutineUnsafeStoreException` when it finds itself inside a
+  coroutine, which covers coroutine hosts. It cannot detect the non-coroutine
+  case — no coroutine id is reported and the extension exposes no way to ask
+  whether a server is running — so absence of the exception is not evidence of
+  safety. Such a host needs `CsrfTokenInterface` bound to a request-scoped
+  store; the package does not yet ship one
+  ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
 
 [0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0
