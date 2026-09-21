@@ -74,7 +74,8 @@ final class CsrfModule extends AbstractModule
             [SameOriginInterceptor::class],
         );
 
-        $this->bind(CsrfTokenInterface::class)->to(SessionCsrfToken::class)->in(Scope::SINGLETON);
+        $this->bind(CsrfStoreInterface::class)->to(SessionCsrfStore::class)->in(Scope::SINGLETON);
+        $this->bind(CsrfTokenInterface::class)->to(StoredCsrfToken::class)->in(Scope::SINGLETON);
         $this->bind(HeaderRequestToken::class);
         $this->bind(ResourceQueryRequestToken::class);
         $this->bind(PostRequestToken::class);

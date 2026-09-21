@@ -30,7 +30,7 @@ final class CoroutineSessionGuardTest extends TestCase
         $caught = null;
         Coroutine\run(static function () use (&$caught): void {
             try {
-                (new SessionCsrfToken())->issue();
+                (new SessionCsrfStore())->get();
             } catch (Throwable $e) {
                 $caught = $e;
             }
@@ -43,10 +43,10 @@ final class CoroutineSessionGuardTest extends TestCase
     public function testStoreWorksOutsideACoroutine(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_id('ray-csrf-coroutine-test');
+            session_id('bear-csrf-coroutine-test');
             session_start();
         }
 
-        $this->assertNotSame('', (new SessionCsrfToken())->issue());
+        $this->assertNotSame('', (new StoredCsrfToken(new SessionCsrfStore()))->issue());
     }
 }

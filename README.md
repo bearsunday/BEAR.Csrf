@@ -131,7 +131,7 @@ $csrf->issue();   // mint a fresh token for the new session
 
 ## Supported hosts
 
-The bundled `SessionCsrfToken` keeps the token in PHP's `$_SESSION`, which
+The bundled `SessionCsrfStore` keeps the token in PHP's `$_SESSION`, which
 belongs to the process. It is correct only where a request owns its process —
 PHP-FPM, mod_php, the built-in server, CLI.
 
@@ -143,13 +143,23 @@ visible from the outside because every request still succeeds. Measured on a
 Swoole 6.2 HTTP server with `enable_coroutine` off: three clients with no
 cookies all received the same token.
 
-`SessionCsrfToken` throws `CoroutineUnsafeStoreException` when it finds itself
+`SessionCsrfStore` throws `CoroutineUnsafeStoreException` when it finds itself
 inside a coroutine, which covers coroutine hosts. **It cannot detect the
 non-coroutine case** — a Swoole worker with `enable_coroutine` off reports no
 coroutine id, and the extension exposes no way to ask whether a server is
 running. Treat the guard as catching one shape of the mistake, not as
 permission to deploy the bundled store on a persistent-worker host.
 
-On such a host, bind `CsrfTokenInterface` to a store scoped to the request —
-coroutine context, or a shared backend keyed by the session id. Everything else
-in this package is stateless and unaffected.
+On such a host, implement `CsrfStoreInterface` against something scoped to the
+request — coroutine context, or a shared backend keyed by the session id — and
+bind it:
+
+```php
+$this->bind(CsrfStoreInterface::class)->to(MyRequestScopedStore::class);
+```
+
+Storage is a separate interface from `CsrfTokenInterface` on purpose. Minting
+with `random_bytes()` and comparing with `hash_equals()` stay in
+`StoredCsrfToken`, so moving the token somewhere else does not mean rewriting
+the parts that have to be right. Everything else in this package is stateless
+and unaffected.

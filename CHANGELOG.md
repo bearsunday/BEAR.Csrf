@@ -21,15 +21,19 @@ method signature.
 - `CsrfModule` — one-stop DI wiring. `withSameOriginCheck()` and
   `withoutSameOriginCheck()` choose which gates run; the constructor is private,
   so a deployment cannot end up unprotected by leaving an argument out.
-- `CsrfTokenInterface` with `SessionCsrfToken`, whose session slot is injected
-  as `CsrfSessionKey` — an application sharing a session with an existing system
-  can name the slot instead of reimplementing the interface.
+- `CsrfTokenInterface` with `StoredCsrfToken`, which mints with `random_bytes()`
+  and compares with `hash_equals()`, and nothing else.
+- `CsrfStoreInterface` with `SessionCsrfStore` — where the token is kept, as a
+  separate interface, so that a host needing somewhere else to put it does not
+  have to reimplement the comparison to get there. Its session slot is injected
+  as `CsrfSessionKey`, so an application sharing a session with an existing
+  system can name the slot.
 - `CsrfTokenField` — the wire field name, shared by the interceptor and the
   consumer's templates.
 
 ### Known limitations
 
-- `SessionCsrfToken` requires a host where a request owns its process (PHP-FPM,
+- `SessionCsrfStore` requires a host where a request owns its process (PHP-FPM,
   mod_php, the built-in server, CLI). On any host serving several requests from
   one persistent worker, `$_SESSION` outlives the request and every visitor of
   that worker shares one token — CSRF protection removed rather than weakened,
@@ -41,8 +45,8 @@ method signature.
   coroutine, which covers coroutine hosts. It cannot detect the non-coroutine
   case — no coroutine id is reported and the extension exposes no way to ask
   whether a server is running — so absence of the exception is not evidence of
-  safety. Such a host needs `CsrfTokenInterface` bound to a request-scoped
-  store; the package does not yet ship one
+  safety. Such a host needs `CsrfStoreInterface` implemented against a
+  request-scoped backing; the package does not yet ship one
   ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
 
 [0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0
