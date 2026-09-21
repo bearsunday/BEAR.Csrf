@@ -58,4 +58,45 @@ final class SessionCsrfTokenTest extends TestCase
         $this->assertNotSame('', $token);
         $this->assertSame(PHP_SESSION_ACTIVE, session_status());
     }
+
+    /**
+     * Which slot holds the token is part of the contract: an application sharing a session
+     * with an existing system has to name it, and interoperability breaks silently if the
+     * key is fixed.
+     */
+    public function testTokenIsStoredUnderTheConfiguredKey(): void
+    {
+        $token = (new SessionCsrfToken(new CsrfSessionKey('cms_token')))->issue();
+
+        $this->assertSame($token, $_SESSION['cms_token'] ?? null);
+        $this->assertArrayNotHasKey(CsrfSessionKey::DEFAULT_NAME, $_SESSION);
+    }
+
+    public function testDefaultKeyIsUsedWhenNoneIsConfigured(): void
+    {
+        $token = (new SessionCsrfToken())->issue();
+
+        $this->assertSame($token, $_SESSION[CsrfSessionKey::DEFAULT_NAME] ?? null);
+    }
+
+    public function testTokensDoNotVerifyAcrossKeys(): void
+    {
+        $issued = (new SessionCsrfToken(new CsrfSessionKey('area_a')))->issue();
+
+        $other = new SessionCsrfToken(new CsrfSessionKey('area_b'));
+
+        $this->assertFalse($other->verify($issued));
+    }
+
+    public function testClearRemovesOnlyTheConfiguredKey(): void
+    {
+        $_SESSION['unrelated'] = 'keep';
+        $csrf = new SessionCsrfToken(new CsrfSessionKey('cms_token'));
+        $csrf->issue();
+
+        $csrf->clear();
+
+        $this->assertArrayNotHasKey('cms_token', $_SESSION);
+        $this->assertSame('keep', $_SESSION['unrelated']);
+    }
 }

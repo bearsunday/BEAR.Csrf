@@ -26,6 +26,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          # The coroutine guard in SessionCsrfToken is only exercised where Swoole is
+          # present; without it that test silently skips and the guard is never run.
+          extensions: swoole
           coverage: pcov
           tools: none
           ini-values: assert.exception=1, zend.assertions=1
