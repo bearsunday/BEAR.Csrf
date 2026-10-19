@@ -181,6 +181,11 @@ visible from the outside because every request still succeeds. Measured on a
 Swoole 6.2 HTTP server with `enable_coroutine` off: three clients with no
 cookies all received the same token.
 
+When `session_start()` fails — an unwritable save path, a session backend that
+is down — `SessionCsrfStore` throws `SessionStartFailedException` on the page
+that renders the form. Silently continuing would store nothing and turn every
+submission into a 403 that blames the token.
+
 `SessionCsrfStore` throws `CoroutineUnsafeStoreException` when it finds itself
 inside a coroutine, which covers coroutine hosts. **It cannot detect the
 non-coroutine case** — a Swoole worker with `enable_coroutine` off reports no

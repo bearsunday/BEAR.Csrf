@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is rendered.
 - `HeaderRequestToken::HEADER_NAME` — the `X-CSRF-Token` header name as a public
   constant, for `<meta>` tags and JavaScript clients to reference.
+- `SessionStartFailedException`, thrown by `SessionCsrfStore` when
+  `session_start()` fails. Before, the failure surfaced as a 403 on every
+  later submission.
 
 ### Changed
 

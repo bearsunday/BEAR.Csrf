@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\CoroutineUnsafeStoreException;
+use BEAR\Csrf\Exception\SessionStartFailedException;
 use Override;
 
 use function call_user_func;
@@ -74,7 +75,9 @@ final class SessionCsrfStore implements CsrfStoreInterface
             return;
         }
 
-        session_start();
+        if (! session_start()) {
+            throw new SessionStartFailedException('session_start() failed, so no token can be stored for this visitor.');
+        }
     }
 
     /** @throws CoroutineUnsafeStoreException When concurrent requests would share one $_SESSION. */
