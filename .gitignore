@@ -7,3 +7,4 @@
 /.phpcs-cache
 /.phpunit.cache/
 /.idea/
+/tests/tmp/
