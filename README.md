@@ -175,6 +175,11 @@ The bundled `SessionCsrfStore` keeps the token in PHP's `$_SESSION`, which
 belongs to the process. It is correct only where a request owns its process —
 PHP-FPM, mod_php, the built-in server, CLI.
 
+The session cookie belongs to the application. Set `HttpOnly`, `SameSite`,
+`Secure` and `use_strict_mode` before the store is first reached, by rendering
+the field or by verifying a submission: the store calls plain `session_start()`,
+and PHP ignores cookie parameters set after a session is active.
+
 **On any host that serves several requests from one persistent worker, do not
 use it.** `$_SESSION` outlives the request there, so every visitor of that
 worker shares one token and a forged request carries a token the server
