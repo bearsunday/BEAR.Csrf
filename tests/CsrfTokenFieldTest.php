@@ -46,6 +46,7 @@ final class CsrfTokenFieldTest extends TestCase
         yield 'dot' => ['csrf.token'];
         yield 'space' => ['csrf token'];
         yield 'brackets' => ['csrf[token]'];
+        yield 'trailing newline' => ["csrf_token\n"];
     }
 
     public function testHyphenatedNameIsAccepted(): void

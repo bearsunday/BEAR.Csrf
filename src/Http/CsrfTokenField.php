@@ -22,7 +22,7 @@ final readonly class CsrfTokenField
             throw new InvalidArgumentException('CSRF token field name must not be empty.');
         }
 
-        if (preg_match('/^[A-Za-z0-9_-]+$/', $this->name) !== 1) {
+        if (preg_match('/^[A-Za-z0-9_-]+$/D', $this->name) !== 1) {
             throw new InvalidArgumentException(sprintf(
                 'CSRF token field name "%s" would not survive form submission: PHP rewrites dots and spaces and parses brackets.',
                 $this->name,
