@@ -102,7 +102,10 @@ final class CsrfModuleWiringTest extends TestCase
         $html = $injector->getInstance(CsrfHiddenInput::class)();
         $this->assertSame('<input type="hidden" name="csrfToken" value="valid-token">', $html);
 
-        $this->assertSame(1, preg_match('/name="([^"]+)" value="([^"]+)"/', $html, $field));
+        if (preg_match('/name="([^"]+)" value="([^"]+)"/', $html, $field) !== 1) {
+            self::fail('No hidden field was rendered.');
+        }
+
         $_POST[$field[1]] = $field[2];
 
         $body = $injector->getInstance(WiredResource::class)->onPost()->body;
