@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The README Resource example is no longer `final`: Ray.Di skips a `final`
   class when weaving, which leaves both gates off without any error.
 
+### Removed
+
+- `#[CsrfToken]` no longer takes a field name. The wire name has one source,
+  `tokenField` in `CsrfModule`, so what a template renders and what the
+  interceptor reads cannot differ. The attribute is a marker.
+
 ## [0.1.0] - 2026-09-21
 
 First release. CSRF defence for BEAR.Sunday, applied by attribute and bound by

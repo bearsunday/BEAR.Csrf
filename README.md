@@ -131,9 +131,7 @@ new TwigFunction('csrf_field', $csrfHiddenInput, ['is_safe' => ['html']]);
 
 The output is `<input type="hidden" name="_csrf_token" value="…">` with both
 attributes already escaped, so emit it raw; escaping it again breaks the markup.
-The Resource does not need to know that this field exists. A method that renames
-the field for itself with `#[CsrfToken('custom_token')]` needs a helper built on
-that name: `new CsrfHiddenInput($csrf, new CsrfTokenField('custom_token'))`.
+The Resource does not need to know that this field exists.
 
 Resolving the helper issues nothing; the token is issued, and the session
 started, when the field is rendered. A rendered page carries the token, and the package

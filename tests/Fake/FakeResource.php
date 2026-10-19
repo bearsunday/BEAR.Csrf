@@ -21,12 +21,6 @@ final class FakeResource extends ResourceObject
         return $this;
     }
 
-    #[CsrfToken('custom_token')]
-    public function onPut(): static
-    {
-        return $this;
-    }
-
     #[SameOrigin]
     public function onDelete(): static
     {
