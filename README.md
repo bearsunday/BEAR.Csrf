@@ -192,8 +192,12 @@ When `session_start()` fails — headers already sent, an unwritable save path, 
 session backend that is down — `SessionCsrfStore` throws
 `SessionStartFailedException`, whether the store is reached by rendering the
 field or by verifying a submission. Silently continuing would store nothing and
-turn every submission into a 403 that blames the token. In CLI, that means
-nothing may be printed before the first `issue()` or `verify()`.
+turn every submission into a 403 that blames the token. One consequence:
+nothing may reach the output before the first `issue()` or `verify()`, because
+the session cookie travels in the headers. BEAR.Sunday renders templates into a
+string before anything is sent, so the `<meta>` example above is fine there;
+a template echoed straight to the output, or a CLI script that prints first,
+has to start the session or buffer the output before issuing.
 
 `SessionCsrfStore` throws `CoroutineUnsafeStoreException` when it finds itself
 inside a coroutine, which covers coroutine hosts. **It cannot detect the
