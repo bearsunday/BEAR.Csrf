@@ -10,7 +10,7 @@ use function preg_match;
 use function sprintf;
 use function strtolower;
 
-/** The wire name of the token field. Only names PHP stores in $_POST unchanged are accepted. */
+/** The wire name of the token field. The name must survive both browser submission and PHP's $_POST parsing. */
 final readonly class CsrfTokenField
 {
     /** Default wire name shared with {@see \BEAR\Csrf\CsrfModule}. */

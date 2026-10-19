@@ -16,11 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HeaderRequestToken::HEADER_NAME` — the `X-CSRF-Token` header name as a public
   constant, for `<meta>` tags and JavaScript clients to reference.
 - `SessionStartFailedException`, thrown by `SessionCsrfStore` when
-  `session_start()` fails. Before, the failure surfaced as a 403 on every
-  later submission.
+  `session_start()` fails, on render and on verify alike. Before, the failure
+  surfaced as a 403 on every later submission.
 
 ### Changed
 
+- `CsrfTokenField` rejects `_charset_` in any letter case, which browsers
+  overwrite with the form encoding, and a name ending in a newline.
 - `CsrfTokenField` rejects names PHP would rewrite on submission (dots, spaces,
   brackets). Such a field rendered fine but never arrived under
   its own name.
@@ -33,7 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `#[CsrfToken]` no longer takes a field name. The wire name has one source,
   `tokenField` in `CsrfModule`, so what a template renders and what the
-  interceptor reads cannot differ. The attribute is a marker.
+  interceptor reads cannot differ. The attribute is a marker. **Breaking:** an
+  argument left on an existing `#[CsrfToken('…')]` is accepted by PHP and
+  ignored, so that method reads `tokenField` and rejects the old name with a 403.
 
 ## [0.1.0] - 2026-09-21
 

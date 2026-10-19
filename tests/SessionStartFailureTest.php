@@ -17,7 +17,7 @@ final class SessionStartFailureTest extends TestCase
 {
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testUnwritableSavePathIsReportedWhereItHappens(): void
+    public function testNonexistentSavePathIsReportedWhereItHappens(): void
     {
         ini_set('session.save_path', __DIR__ . '/tmp/no-such-dir/sessions');
         set_error_handler(static fn (): bool => true);
