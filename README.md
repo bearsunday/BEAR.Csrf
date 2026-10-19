@@ -93,8 +93,8 @@ The submitted token is read in this order:
 This keeps the token out of Resource method arguments while still supporting
 BEAR.Resource requests, HTML forms, and JavaScript submissions.
 
-The header name `X-CSRF-Token` is fixed and is **not** affected by `tokenField`;
-only the query and `$_POST` sources use the configured `tokenField` name.
+The header name is fixed and exposed as `HeaderRequestToken::NAME`; it is **not**
+affected by `tokenField`, which only the query and `$_POST` sources use.
 
 Avoid the query-string source for browser-facing requests: a token placed in the
 URL can leak through server access logs, the `Referer` header, browser history,
@@ -104,11 +104,39 @@ BEAR.Resource requests whose URI is never exposed to a browser.
 
 ## Template example
 
-Issue a token through `CsrfTokenInterface` in your renderer or template helper
-and render it as a hidden field:
+`CsrfHiddenInput` renders the hidden field as one escaped string, with the name
+taken from the bound `CsrfTokenField`. Inject it into your template helper and
+call it inside every form that submits to a protected method:
+
+```php
+// Qiq: a Helpers subclass bound in place of HtmlHelpers
+public function csrfField(): string
+{
+    return ($this->csrfHiddenInput)();
+}
+```
 
 ```html
-<input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
+<form method="post" action="/admin/article">
+  {{= csrfField() }}
+```
+
+```php
+// Twig: the function returns markup, so declare it safe
+new TwigFunction('csrf_field', $csrfHiddenInput, ['is_safe' => ['html']]);
+```
+
+The output is `<input type="hidden" name="_csrf_token" value="…">` with both
+attributes already escaped, so emit it raw; escaping it again breaks the markup.
+The token is issued when the field is rendered, so a page without a form never
+opens a session for it. A rendered page still carries the token, so do not
+serve HTML containing this field from a shared cache.
+
+For JavaScript, expose the same token once in a `<meta>` tag and send it back in
+the `HeaderRequestToken::NAME` header, attaching it to same-origin requests only:
+
+```html
+<meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES) ?>">
 ```
 
 The Resource does not need to know that this field exists.

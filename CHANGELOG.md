@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `CsrfHiddenInput` — the hidden field as one escaped string, named from the
+  bound `CsrfTokenField`. Template helpers delegate to it so a renamed wire
+  field cannot leave a form behind, and the token is issued only when a form is
+  rendered.
+- `HeaderRequestToken::NAME` — the `X-CSRF-Token` header name as a public
+  constant, for `<meta>` tags and JavaScript clients to reference.
+
+### Changed
+
+- The README template example renders through `CsrfHiddenInput`. The previous
+  example wrote the token out unescaped under a hard-coded field name.
+
 ## [0.1.0] - 2026-09-21
 
 First release. CSRF defence for BEAR.Sunday, applied by attribute and bound by
@@ -49,4 +65,5 @@ method signature.
   request-scoped backing; the package does not yet ship one
   ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
 
+[Unreleased]: https://github.com/bearsunday/BEAR.Csrf/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0

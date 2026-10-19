@@ -12,7 +12,10 @@ use function is_string;
 /** @SuppressWarnings("PHPMD.Superglobals") Header adapter boundary. */
 final readonly class HeaderRequestToken implements RequestTokenInterface
 {
-    private const HEADER_KEY = 'HTTP_X_CSRF_TOKEN';
+    /** The request header a JavaScript client sends the token in. */
+    public const NAME = 'X-CSRF-Token';
+
+    private const SERVER_KEY = 'HTTP_X_CSRF_TOKEN';
 
     /** @param MethodInvocation<object> $invocation */
     #[Override]
@@ -20,7 +23,7 @@ final readonly class HeaderRequestToken implements RequestTokenInterface
     {
         unset($invocation, $field);
 
-        $value = $_SERVER[self::HEADER_KEY] ?? null;
+        $value = $_SERVER[self::SERVER_KEY] ?? null;
         if (! is_string($value) || $value === '') {
             return null;
         }

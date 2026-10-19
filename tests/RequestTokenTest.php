@@ -15,6 +15,9 @@ use BEAR\Csrf\Http\ResourceQueryRequestToken;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+use function str_replace;
+use function strtoupper;
+
 final class RequestTokenTest extends TestCase
 {
     protected function setUp(): void
@@ -30,6 +33,18 @@ final class RequestTokenTest extends TestCase
         $actual = (new HeaderRequestToken())->submitted($this->invocation(), new CsrfTokenField());
 
         $this->assertSame('header-token', $actual);
+    }
+
+    /** The public name is what a client sends; PHP exposes it under the HTTP_ server key the reader uses. */
+    public function testHeaderNameMatchesTheServerKeyRead(): void
+    {
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', HeaderRequestToken::NAME));
+        $_SERVER[$serverKey] = 'named-token';
+
+        $actual = (new HeaderRequestToken())->submitted($this->invocation(), new CsrfTokenField());
+
+        $this->assertSame('X-CSRF-Token', HeaderRequestToken::NAME);
+        $this->assertSame('named-token', $actual);
     }
 
     public function testResourceQueryRequestToken(): void
