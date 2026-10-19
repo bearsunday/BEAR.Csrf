@@ -6,17 +6,18 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
+use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
 use BEAR\Csrf\Fake\WiredResource;
+use BEAR\Csrf\Html\CsrfHiddenInput;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function bin2hex;
+use function is_dir;
 use function mkdir;
-use function random_bytes;
-use function sys_get_temp_dir;
+use function preg_match;
 
 /**
  * Proves the attributes become interception through a real injector.
@@ -94,15 +95,50 @@ final class CsrfModuleWiringTest extends TestCase
         $this->resource(new TokenGateOnlyModule())->onPost();
     }
 
+    /** The field a template renders is the one the interceptor reads: both come from the module. */
+    public function testRenamedFieldPassesTheGateUnderTheRenderedName(): void
+    {
+        $injector = $this->injector(new RenamedFieldModule());
+        $html = $injector->getInstance(CsrfHiddenInput::class)();
+        $this->assertSame('<input type="hidden" name="csrfToken" value="valid-token">', $html);
+
+        if (preg_match('/name="([^"]+)" value="([^"]+)"/', $html, $field) !== 1) {
+            self::fail('No hidden field was rendered.');
+        }
+
+        $_POST[$field[1]] = $field[2];
+
+        $body = $injector->getInstance(WiredResource::class)->onPost()->body;
+
+        $this->assertIsArray($body);
+        $this->assertSame('ok', $body['result']);
+    }
+
+    public function testRenamedFieldRejectsTheDefaultName(): void
+    {
+        $_POST['_csrf_token'] = 'valid-token';
+
+        $this->expectException(MissingCsrfTokenForbiddenException::class);
+
+        $this->resource(new RenamedFieldModule())->onPost();
+    }
+
+    private function resource(AbstractModule $module): WiredResource
+    {
+        return $this->injector($module)->getInstance(WiredResource::class);
+    }
+
     /**
      * Ray.Aop weaves by subclassing, so the injector needs a directory to compile into.
      * Without one the resource comes back unwoven and every gate silently does nothing.
      */
-    private function resource(AbstractModule $module): WiredResource
+    private function injector(AbstractModule $module): Injector
     {
-        $tmpDir = sys_get_temp_dir() . '/bear-csrf-aop-' . bin2hex(random_bytes(6));
-        mkdir($tmpDir);
+        $tmpDir = __DIR__ . '/tmp';
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir);
+        }
 
-        return (new Injector($module, $tmpDir))->getInstance(WiredResource::class);
+        return new Injector($module, $tmpDir);
     }
 }

@@ -6,6 +6,7 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
+use BEAR\Csrf\Html\CsrfHiddenInput;
 use BEAR\Csrf\Http\AllowedOrigin;
 use BEAR\Csrf\Http\CompositeRequestToken;
 use BEAR\Csrf\Http\CsrfTokenField;
@@ -76,6 +77,7 @@ final class CsrfModule extends AbstractModule
 
         $this->bind(CsrfStoreInterface::class)->to(SessionCsrfStore::class)->in(Scope::SINGLETON);
         $this->bind(CsrfTokenInterface::class)->to(StoredCsrfToken::class)->in(Scope::SINGLETON);
+        $this->bind(CsrfHiddenInput::class);
         $this->bind(HeaderRequestToken::class);
         $this->bind(ResourceQueryRequestToken::class);
         $this->bind(PostRequestToken::class);

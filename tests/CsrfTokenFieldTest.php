@@ -6,6 +6,7 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Http\CsrfTokenField;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CsrfTokenFieldTest extends TestCase
@@ -27,5 +28,45 @@ final class CsrfTokenFieldTest extends TestCase
         $this->expectExceptionMessage('must not be empty');
 
         new CsrfTokenField('');
+    }
+
+    /** PHP stores "csrf.token" and "csrf token" as "csrf_token", and "csrf[token]" as an array. */
+    #[DataProvider('namesPhpRewrites')]
+    public function testNamePhpWouldRewriteIsRejected(string $name): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('would not survive form submission');
+
+        new CsrfTokenField($name);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function namesPhpRewrites(): iterable
+    {
+        yield 'dot' => ['csrf.token'];
+        yield 'space' => ['csrf token'];
+        yield 'brackets' => ['csrf[token]'];
+        yield 'trailing newline' => ["csrf_token\n"];
+    }
+
+    #[DataProvider('charsetNames')]
+    public function testCharsetNameIsRejected(string $name): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('is reserved');
+
+        new CsrfTokenField($name);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function charsetNames(): iterable
+    {
+        yield 'lower' => ['_charset_'];
+        yield 'upper' => ['_CHARSET_'];
+    }
+
+    public function testHyphenatedNameIsAccepted(): void
+    {
+        $this->assertSame('csrf-token', (new CsrfTokenField('csrf-token'))->name);
     }
 }

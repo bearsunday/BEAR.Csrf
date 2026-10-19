@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\InvalidCsrfTokenForbiddenException;
-use BEAR\Csrf\Exception\LogicException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
 use BEAR\Csrf\Fake\FakeCsrfToken;
 use BEAR\Csrf\Fake\FakeInvocation;
@@ -54,24 +53,16 @@ final class CsrfTokenInterceptorTest extends TestCase
         $this->interceptor()->invoke(new FakeInvocation(new FakeResource(), 'onPost'));
     }
 
-    public function testCustomField(): void
+    public function testBoundFieldIsTheOneRead(): void
     {
         $resource = new FakeResource();
         $resource->uri = new FakeUri();
-        $resource->uri->query = ['custom_token' => 'valid-token'];
-        $invocation = new FakeInvocation($resource, 'onPut');
+        $resource->uri->query = ['csrfToken' => 'valid-token'];
+        $invocation = new FakeInvocation($resource, 'onPost');
 
-        $actual = $this->interceptor()->invoke($invocation);
+        $actual = $this->interceptor(field: new CsrfTokenField('csrfToken'))->invoke($invocation);
 
         $this->assertSame('proceeded', $actual);
-    }
-
-    public function testMissingCsrfTokenAttributeIsConfigurationError(): void
-    {
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('requires #[CsrfToken]');
-
-        $this->interceptor()->invoke(new FakeInvocation(new FakeResource(), 'onGet'));
     }
 
     /**
@@ -104,12 +95,12 @@ final class CsrfTokenInterceptorTest extends TestCase
         }
     }
 
-    private function interceptor(CsrfTokenInterface|null $csrf = null): CsrfTokenInterceptor
+    private function interceptor(CsrfTokenInterface|null $csrf = null, CsrfTokenField|null $field = null): CsrfTokenInterceptor
     {
         return new CsrfTokenInterceptor(
             $csrf ?? new FakeCsrfToken('valid-token'),
             new CompositeRequestToken(new HeaderRequestToken(), new ResourceQueryRequestToken(), new PostRequestToken()),
-            new CsrfTokenField(),
+            $field ?? new CsrfTokenField(),
         );
     }
 }

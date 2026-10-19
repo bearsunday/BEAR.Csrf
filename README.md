@@ -52,8 +52,9 @@ $this->install(CsrfModule::withSameOriginCheck(
 ```php
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
+use BEAR\Resource\ResourceObject;
 
-final class Article extends ResourceObject
+class Article extends ResourceObject
 {
     #[SameOrigin]
     #[CsrfToken]
@@ -65,6 +66,9 @@ final class Article extends ResourceObject
     }
 }
 ```
+
+The Resource must not be `final`. Ray.Aop applies both gates by subclassing,
+and Ray.Di silently skips a `final` class, so its methods run unprotected.
 
 `#[SameOrigin]` validates browser origin signals (`Sec-Fetch-Site`, `Origin`,
 `Referer`), and runs only under `withSameOriginCheck()`.
@@ -93,25 +97,63 @@ The submitted token is read in this order:
 This keeps the token out of Resource method arguments while still supporting
 BEAR.Resource requests, HTML forms, and JavaScript submissions.
 
-The header name `X-CSRF-Token` is fixed and is **not** affected by `tokenField`;
-only the query and `$_POST` sources use the configured `tokenField` name.
+The header name is fixed and exposed as `HeaderRequestToken::HEADER_NAME`; it is **not**
+affected by `tokenField`, which only the query and `$_POST` sources use.
 
-Avoid the query-string source for browser-facing requests: a token placed in the
-URL can leak through server access logs, the `Referer` header, browser history,
-and shared or bookmarked links. Prefer the `X-CSRF-Token` header or the `$_POST`
-body for browser submissions, and reserve `uri->query` for server-side
-BEAR.Resource requests whose URI is never exposed to a browser.
+The first source that holds a non-empty value wins; sources are never combined,
+so a wrong header token is not rescued by a correct `$_POST` token.
+
+BEAR.Sunday's web router fills `uri->query` from `$_POST` on POST and from the
+form-encoded or JSON request body on PUT, PATCH and DELETE, so a browser form
+submission or a JSON body is read by the second source. Never put the token in
+the URL query string: a token placed in the URL can leak through server access
+logs, the `Referer` header, browser history, and shared or bookmarked links.
 
 ## Template example
 
-Issue a token through `CsrfTokenInterface` in your renderer or template helper
-and render it as a hidden field:
+`CsrfHiddenInput` renders the hidden field as one escaped string, with the name
+taken from the bound `CsrfTokenField`. Inject it into your template helper and
+call it inside every form that submits to a protected method:
 
-```html
-<input type="hidden" name="_csrf_token" value="<?= $csrfToken ?>">
+```php
+// Qiq: a Helpers subclass bound in place of HtmlHelpers
+public function csrfField(): string
+{
+    return ($this->csrfHiddenInput)();
+}
 ```
 
+```html
+<form method="post" action="/admin/article">
+  {{= csrfField() }}
+```
+
+```php
+// Twig: the function returns markup, so declare it safe
+new TwigFunction('csrf_field', $csrfHiddenInput, ['is_safe' => ['html']]);
+```
+
+The output is `<input type="hidden" name="_csrf_token" value="…">` with both
+attributes already escaped, so emit it raw; escaping it again breaks the markup.
 The Resource does not need to know that this field exists.
+
+Resolving the helper issues nothing; the token is issued, and the session
+started, when the field is rendered. A rendered page carries the token, and the package
+sets no cache headers of its own: do not put a resource whose body carries the
+token behind `#[Cacheable]` or a CDN, and send such pages as
+`Cache-Control: private, no-store`.
+
+For JavaScript, expose the same token once in a `<meta>` tag and send it back in
+the `X-CSRF-Token` header (`HeaderRequestToken::HEADER_NAME`), attaching it to same-origin
+requests only. `$csrf` is the injected `CsrfTokenInterface`; the same cache rule
+applies to any markup carrying the token. In plain PHP:
+
+```php
+<meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8') ?>">
+```
+
+Qiq accepts the `<?= ?>` above as is. Twig does not: expose `$csrf->issue()`
+through a function and let Twig escape it in the attribute.
 
 ## Token lifecycle
 
@@ -119,13 +161,15 @@ The synchroniser token is stored per session and stays stable across requests,
 so it does not need to be reissued for every form.
 
 Rotate it whenever the authentication state changes, to mitigate login CSRF and
-session fixation. On login and logout, regenerate the session id and clear the
-token so the next `issue()` mints a fresh one bound to the new session:
+session fixation. On login and logout, clear the token and regenerate the
+session id, so the next `issue()` mints a fresh one bound to the new session.
+`clear()` starts the session when none is active yet, so in this order
+`session_regenerate_id()` always has a session to work on:
 
 ```php
 // $csrf is an injected CsrfTokenInterface
-session_regenerate_id(true);
 $csrf->clear();   // drop the old token
+session_regenerate_id(true);
 $csrf->issue();   // mint a fresh token for the new session
 ```
 
@@ -135,6 +179,11 @@ The bundled `SessionCsrfStore` keeps the token in PHP's `$_SESSION`, which
 belongs to the process. It is correct only where a request owns its process —
 PHP-FPM, mod_php, the built-in server, CLI.
 
+The session cookie belongs to the application. Set `HttpOnly`, `SameSite`,
+`Secure` and `use_strict_mode` before the store is first reached, by rendering
+the field or by verifying a submission: the store calls plain `session_start()`,
+and PHP ignores cookie parameters set after a session is active.
+
 **On any host that serves several requests from one persistent worker, do not
 use it.** `$_SESSION` outlives the request there, so every visitor of that
 worker shares one token and a forged request carries a token the server
@@ -142,6 +191,17 @@ accepts. This does not weaken CSRF protection, it removes it, and nothing is
 visible from the outside because every request still succeeds. Measured on a
 Swoole 6.2 HTTP server with `enable_coroutine` off: three clients with no
 cookies all received the same token.
+
+When `session_start()` fails — headers already sent, an unwritable save path, a
+session backend that is down — `SessionCsrfStore` throws
+`SessionStartFailedException`, whether the store is reached by rendering the
+field or by verifying a submission. Silently continuing would store nothing and
+turn every submission into a 403 that blames the token. One consequence:
+nothing may reach the output before the first `issue()` or `verify()`, because
+the session cookie travels in the headers. BEAR.Sunday renders templates into a
+string before anything is sent, so the `<meta>` example above is fine there;
+a template echoed straight to the output, or a CLI script that prints first,
+has to start the session or buffer the output before issuing.
 
 `SessionCsrfStore` throws `CoroutineUnsafeStoreException` when it finds itself
 inside a coroutine, which covers coroutine hosts. **It cannot detect the

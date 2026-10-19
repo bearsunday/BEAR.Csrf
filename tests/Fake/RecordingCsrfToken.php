@@ -12,6 +12,7 @@ final class RecordingCsrfToken implements CsrfTokenInterface
 {
     /** @var list<string> */
     public array $verified = [];
+    public int $issued = 0;
 
     public function __construct(private readonly bool $accepts = false)
     {
@@ -20,6 +21,8 @@ final class RecordingCsrfToken implements CsrfTokenInterface
     #[Override]
     public function issue(): string
     {
+        $this->issued++;
+
         return 'recording-token';
     }
 

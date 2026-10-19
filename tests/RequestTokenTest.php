@@ -15,6 +15,9 @@ use BEAR\Csrf\Http\ResourceQueryRequestToken;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+use function str_replace;
+use function strtoupper;
+
 final class RequestTokenTest extends TestCase
 {
     protected function setUp(): void
@@ -30,6 +33,18 @@ final class RequestTokenTest extends TestCase
         $actual = (new HeaderRequestToken())->submitted($this->invocation(), new CsrfTokenField());
 
         $this->assertSame('header-token', $actual);
+    }
+
+    /** The public name is what a client sends; PHP exposes it under the HTTP_ server key the reader uses. */
+    public function testHeaderNameMatchesTheServerKeyRead(): void
+    {
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', HeaderRequestToken::HEADER_NAME));
+        $_SERVER[$serverKey] = 'named-token';
+
+        $actual = (new HeaderRequestToken())->submitted($this->invocation(), new CsrfTokenField());
+
+        $this->assertSame('X-CSRF-Token', HeaderRequestToken::HEADER_NAME);
+        $this->assertSame('named-token', $actual);
     }
 
     public function testResourceQueryRequestToken(): void
@@ -55,6 +70,15 @@ final class RequestTokenTest extends TestCase
         $_POST['_csrf_token'] = 'post-token';
 
         $actual = (new PostRequestToken())->submitted($this->invocation(), new CsrfTokenField());
+
+        $this->assertSame('post-token', $actual);
+    }
+
+    public function testPostRequestTokenReadsTheBoundField(): void
+    {
+        $_POST['csrfToken'] = 'post-token';
+
+        $actual = (new PostRequestToken())->submitted($this->invocation(), new CsrfTokenField('csrfToken'));
 
         $this->assertSame('post-token', $actual);
     }
