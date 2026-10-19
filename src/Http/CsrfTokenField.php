@@ -8,6 +8,7 @@ use InvalidArgumentException;
 
 use function preg_match;
 use function sprintf;
+use function strtolower;
 
 /** The wire name of the token field. Only names PHP stores in $_POST unchanged are accepted. */
 final readonly class CsrfTokenField
@@ -27,6 +28,10 @@ final readonly class CsrfTokenField
                 'CSRF token field name "%s" would not survive form submission: PHP rewrites dots and spaces and parses brackets.',
                 $this->name,
             ));
+        }
+
+        if (strtolower($this->name) === '_charset_') {
+            throw new InvalidArgumentException('CSRF token field name "_charset_" is reserved: browsers replace its value with the form encoding.');
         }
     }
 }

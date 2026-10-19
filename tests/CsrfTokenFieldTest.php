@@ -49,6 +49,22 @@ final class CsrfTokenFieldTest extends TestCase
         yield 'trailing newline' => ["csrf_token\n"];
     }
 
+    #[DataProvider('charsetNames')]
+    public function testCharsetNameIsRejected(string $name): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('is reserved');
+
+        new CsrfTokenField($name);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function charsetNames(): iterable
+    {
+        yield 'lower' => ['_charset_'];
+        yield 'upper' => ['_CHARSET_'];
+    }
+
     public function testHyphenatedNameIsAccepted(): void
     {
         $this->assertSame('csrf-token', (new CsrfTokenField('csrf-token'))->name);
