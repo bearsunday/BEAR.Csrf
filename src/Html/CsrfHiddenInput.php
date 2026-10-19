@@ -15,14 +15,7 @@ use const ENT_QUOTES;
 use const ENT_SUBSTITUTE;
 
 /**
- * The hidden field a form submits the token in, as one escaped string.
- *
- * Template helpers delegate to this instead of spelling the input out. The
- * field name comes from the same {@see CsrfTokenField} the interceptor reads,
- * so renaming the wire field cannot leave a form behind, and the token is
- * issued only when a form is actually rendered, so a page without one never
- * opens the session for it. Both attributes are escaped here; the template
- * engine must emit the result raw.
+ * The hidden field a form submits the token in. Both attributes are escaped; emit the result raw.
  */
 final readonly class CsrfHiddenInput
 {
