@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace BEAR\Csrf\Fake;
 
-use Override;
 use BEAR\Csrf\CsrfModule;
 use BEAR\Csrf\CsrfTokenInterface;
+use Override;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 

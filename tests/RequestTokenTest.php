@@ -74,6 +74,15 @@ final class RequestTokenTest extends TestCase
         $this->assertSame('post-token', $actual);
     }
 
+    public function testPostRequestTokenReadsTheBoundField(): void
+    {
+        $_POST['csrfToken'] = 'post-token';
+
+        $actual = (new PostRequestToken())->submitted($this->invocation(), new CsrfTokenField('csrfToken'));
+
+        $this->assertSame('post-token', $actual);
+    }
+
     public function testCompositeRequestTokenPrecedence(): void
     {
         $_SERVER['HTTP_X_CSRF_TOKEN'] = 'header-token';
