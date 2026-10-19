@@ -53,7 +53,7 @@ $this->install(CsrfModule::withSameOriginCheck(
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
 
-final class Article extends ResourceObject
+class Article extends ResourceObject
 {
     #[SameOrigin]
     #[CsrfToken]
@@ -65,6 +65,9 @@ final class Article extends ResourceObject
     }
 }
 ```
+
+The Resource must not be `final`. Ray.Aop applies both gates by subclassing,
+and Ray.Di silently skips a `final` class, so its methods run unprotected.
 
 `#[SameOrigin]` validates browser origin signals (`Sec-Fetch-Site`, `Origin`,
 `Referer`), and runs only under `withSameOriginCheck()`.
@@ -128,10 +131,12 @@ new TwigFunction('csrf_field', $csrfHiddenInput, ['is_safe' => ['html']]);
 
 The output is `<input type="hidden" name="_csrf_token" value="…">` with both
 attributes already escaped, so emit it raw; escaping it again breaks the markup.
-The Resource does not need to know that this field exists.
+The Resource does not need to know that this field exists. A method that renames
+the field for itself with `#[CsrfToken('custom_token')]` needs a helper built on
+that name: `new CsrfHiddenInput($csrf, new CsrfTokenField('custom_token'))`.
 
-The token is issued when the field is rendered, so a page without a form never
-opens a session for it. A rendered page still carries the token, and the package
+Resolving the helper issues nothing; the token is issued, and the session
+started, when the field is rendered. A rendered page carries the token, and the package
 sets no cache headers of its own: do not put a resource whose body carries the
 token behind `#[Cacheable]` or a CDN, and send such pages as
 `Cache-Control: private, no-store`.
@@ -145,8 +150,8 @@ applies to any markup carrying the token. In plain PHP:
 <meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8') ?>">
 ```
 
-In Qiq or Twig, expose `$csrf->issue()` through a helper and print it with the
-engine's own escaping; the `<?= ?>` above is not a template expression there.
+Qiq accepts the `<?= ?>` above as is. Twig does not: expose `$csrf->issue()`
+through a function and let Twig escape it in the attribute.
 
 ## Token lifecycle
 

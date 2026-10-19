@@ -11,15 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `CsrfHiddenInput` — the hidden field as one escaped string, named from the
   bound `CsrfTokenField`. Template helpers can delegate to it so a renamed wire
-  field cannot leave a form behind, and the token is issued only when a form is
-  rendered.
+  field cannot leave a form behind, and the token is issued only when the field
+  is rendered.
 - `HeaderRequestToken::HEADER_NAME` — the `X-CSRF-Token` header name as a public
   constant, for `<meta>` tags and JavaScript clients to reference.
 
 ### Changed
 
+- `CsrfTokenField` rejects names PHP would rewrite on submission (dots, spaces,
+  brackets). Such a field rendered fine but never arrived under
+  its own name.
 - The README template example renders through `CsrfHiddenInput`. The previous
   example wrote the token out unescaped under a hard-coded field name.
+- The README Resource example is no longer `final`: Ray.Di skips a `final`
+  class when weaving, which leaves both gates off without any error.
 
 ## [0.1.0] - 2026-09-21
 

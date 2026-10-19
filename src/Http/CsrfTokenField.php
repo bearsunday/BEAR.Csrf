@@ -6,6 +6,10 @@ namespace BEAR\Csrf\Http;
 
 use InvalidArgumentException;
 
+use function preg_match;
+use function sprintf;
+
+/** The wire name of the token field. Only names PHP stores in $_POST unchanged are accepted. */
 final readonly class CsrfTokenField
 {
     /** Default wire name shared with {@see \BEAR\Csrf\CsrfModule}. */
@@ -16,6 +20,13 @@ final readonly class CsrfTokenField
     ) {
         if ($this->name === '') {
             throw new InvalidArgumentException('CSRF token field name must not be empty.');
+        }
+
+        if (preg_match('/^[A-Za-z0-9_-]+$/', $this->name) !== 1) {
+            throw new InvalidArgumentException(sprintf(
+                'CSRF token field name "%s" would not survive form submission: PHP rewrites dots and spaces and parses brackets.',
+                $this->name,
+            ));
         }
     }
 }

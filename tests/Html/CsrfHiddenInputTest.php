@@ -25,13 +25,13 @@ final class CsrfHiddenInputTest extends TestCase
         $this->assertSame('<input type="hidden" name="_csrf_token" value="abc123">', $input());
     }
 
-    /** Neither attribute is trusted: the token is opaque and the field name is configuration. */
-    public function testBothAttributesAreEscaped(): void
+    /** The token is opaque to this class, so it is escaped like any untrusted value. */
+    public function testTokenIsEscaped(): void
     {
-        $input = new CsrfHiddenInput(new FakeCsrfToken('"><script>\'&'), new CsrfTokenField('a"b<c'));
+        $input = new CsrfHiddenInput(new FakeCsrfToken('"><script>\'&'), new CsrfTokenField());
 
         $this->assertSame(
-            '<input type="hidden" name="a&quot;b&lt;c" value="&quot;&gt;&lt;script&gt;&apos;&amp;">',
+            '<input type="hidden" name="_csrf_token" value="&quot;&gt;&lt;script&gt;&apos;&amp;">',
             $input(),
         );
     }
