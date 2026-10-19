@@ -139,11 +139,14 @@ token behind `#[Cacheable]` or a CDN, and send such pages as
 For JavaScript, expose the same token once in a `<meta>` tag and send it back in
 the `HeaderRequestToken::HEADER_NAME` header, attaching it to same-origin
 requests only. `$csrf` is the injected `CsrfTokenInterface`; the same cache rule
-applies to any markup carrying the token:
+applies to any markup carrying the token. In plain PHP:
 
-```html
+```php
 <meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5) ?>">
 ```
+
+In Qiq or Twig, expose `$csrf->issue()` through a helper and print it with the
+engine's own escaping; the `<?= ?>` above is not a template expression there.
 
 ## Token lifecycle
 
