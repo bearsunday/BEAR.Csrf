@@ -93,7 +93,7 @@ The submitted token is read in this order:
 This keeps the token out of Resource method arguments while still supporting
 BEAR.Resource requests, HTML forms, and JavaScript submissions.
 
-The header name is fixed and exposed as `HeaderRequestToken::NAME`; it is **not**
+The header name is fixed and exposed as `HeaderRequestToken::HEADER_NAME`; it is **not**
 affected by `tokenField`, which only the query and `$_POST` sources use.
 
 Avoid the query-string source for browser-facing requests: a token placed in the
@@ -128,18 +128,22 @@ new TwigFunction('csrf_field', $csrfHiddenInput, ['is_safe' => ['html']]);
 
 The output is `<input type="hidden" name="_csrf_token" value="…">` with both
 attributes already escaped, so emit it raw; escaping it again breaks the markup.
+The Resource does not need to know that this field exists.
+
 The token is issued when the field is rendered, so a page without a form never
-opens a session for it. A rendered page still carries the token, so do not
-serve HTML containing this field from a shared cache.
+opens a session for it. A rendered page still carries the token, and the package
+sets no cache headers of its own: do not put a resource whose body carries the
+token behind `#[Cacheable]` or a CDN, and send such pages as
+`Cache-Control: private, no-store`.
 
 For JavaScript, expose the same token once in a `<meta>` tag and send it back in
-the `HeaderRequestToken::NAME` header, attaching it to same-origin requests only:
+the `HeaderRequestToken::HEADER_NAME` header, attaching it to same-origin
+requests only. `$csrf` is the injected `CsrfTokenInterface`; the same cache rule
+applies to any markup carrying the token:
 
 ```html
-<meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES) ?>">
+<meta name="csrf-token" content="<?= htmlspecialchars($csrf->issue(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5) ?>">
 ```
-
-The Resource does not need to know that this field exists.
 
 ## Token lifecycle
 

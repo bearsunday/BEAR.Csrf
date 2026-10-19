@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `CsrfHiddenInput` — the hidden field as one escaped string, named from the
-  bound `CsrfTokenField`. Template helpers delegate to it so a renamed wire
+  bound `CsrfTokenField`. Template helpers can delegate to it so a renamed wire
   field cannot leave a form behind, and the token is issued only when a form is
   rendered.
-- `HeaderRequestToken::NAME` — the `X-CSRF-Token` header name as a public
+- `HeaderRequestToken::HEADER_NAME` — the `X-CSRF-Token` header name as a public
   constant, for `<meta>` tags and JavaScript clients to reference.
 
 ### Changed

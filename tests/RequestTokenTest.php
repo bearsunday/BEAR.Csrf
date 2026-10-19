@@ -38,12 +38,12 @@ final class RequestTokenTest extends TestCase
     /** The public name is what a client sends; PHP exposes it under the HTTP_ server key the reader uses. */
     public function testHeaderNameMatchesTheServerKeyRead(): void
     {
-        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', HeaderRequestToken::NAME));
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', HeaderRequestToken::HEADER_NAME));
         $_SERVER[$serverKey] = 'named-token';
 
         $actual = (new HeaderRequestToken())->submitted($this->invocation(), new CsrfTokenField());
 
-        $this->assertSame('X-CSRF-Token', HeaderRequestToken::NAME);
+        $this->assertSame('X-CSRF-Token', HeaderRequestToken::HEADER_NAME);
         $this->assertSame('named-token', $actual);
     }
 

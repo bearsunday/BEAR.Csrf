@@ -6,6 +6,7 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
+use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
 use BEAR\Csrf\Fake\WiredResource;
@@ -98,9 +99,9 @@ final class CsrfModuleWiringTest extends TestCase
     /** The field a template renders is the one the interceptor reads: both come from the module. */
     public function testHiddenInputRendersTheBoundField(): void
     {
-        $input = $this->injector(new TestCsrfModule())->getInstance(CsrfHiddenInput::class);
+        $input = $this->injector(new RenamedFieldModule())->getInstance(CsrfHiddenInput::class);
 
-        $this->assertSame('<input type="hidden" name="_csrf_token" value="valid-token">', $input());
+        $this->assertSame('<input type="hidden" name="csrfToken" value="valid-token">', $input());
     }
 
     private function resource(AbstractModule $module): WiredResource

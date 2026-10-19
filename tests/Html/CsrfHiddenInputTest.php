@@ -28,12 +28,19 @@ final class CsrfHiddenInputTest extends TestCase
     /** Neither attribute is trusted: the token is opaque and the field name is configuration. */
     public function testBothAttributesAreEscaped(): void
     {
-        $input = new CsrfHiddenInput(new FakeCsrfToken('"><script>'), new CsrfTokenField('a"b<c'));
+        $input = new CsrfHiddenInput(new FakeCsrfToken('"><script>\'&'), new CsrfTokenField('a"b<c'));
 
         $this->assertSame(
-            '<input type="hidden" name="a&quot;b&lt;c" value="&quot;&gt;&lt;script&gt;">',
+            '<input type="hidden" name="a&quot;b&lt;c" value="&quot;&gt;&lt;script&gt;&apos;&amp;">',
             $input(),
         );
+    }
+
+    public function testInvalidUtf8IsSubstitutedRatherThanDropped(): void
+    {
+        $input = new CsrfHiddenInput(new FakeCsrfToken("a\xC3b"), new CsrfTokenField());
+
+        $this->assertSame("<input type=\"hidden\" name=\"_csrf_token\" value=\"a\u{FFFD}b\">", $input());
     }
 
     public function testTokenIsIssuedOnlyWhenRendered(): void

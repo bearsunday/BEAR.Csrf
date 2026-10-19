@@ -13,7 +13,7 @@ use function is_string;
 final readonly class HeaderRequestToken implements RequestTokenInterface
 {
     /** The request header a JavaScript client sends the token in. */
-    public const NAME = 'X-CSRF-Token';
+    public const HEADER_NAME = 'X-CSRF-Token';
 
     private const SERVER_KEY = 'HTTP_X_CSRF_TOKEN';
 
