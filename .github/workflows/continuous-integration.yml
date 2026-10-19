@@ -10,6 +10,13 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Codecov authenticates the upload with GitHub's OIDC token instead of a stored
+    # secret. A secret did not survive the repository transfer, and without one the
+    # upload failed silently while the workflow stayed green.
+    permissions:
+      contents: read
+      id-token: write
+
     strategy:
       matrix:
         operating-system:
@@ -63,6 +70,8 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           files: coverage.xml
-          fail_ci_if_error: false
+          # codecov.yml demands 100%. A gate whose upload can fail silently is no
+          # gate: the transfer disabled it for a month without a red build.
+          fail_ci_if_error: true
