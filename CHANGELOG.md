@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
 ### Added
 
 - `CsrfHiddenInput` — the hidden field as one escaped string, named from the
@@ -83,5 +85,6 @@ method signature.
   request-scoped backing; the package does not yet ship one
   ([#7](https://github.com/bearsunday/BEAR.Csrf/issues/7)).
 
-[Unreleased]: https://github.com/bearsunday/BEAR.Csrf/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/bearsunday/BEAR.Csrf/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.2.0
 [0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0
