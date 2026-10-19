@@ -157,13 +157,15 @@ The synchroniser token is stored per session and stays stable across requests,
 so it does not need to be reissued for every form.
 
 Rotate it whenever the authentication state changes, to mitigate login CSRF and
-session fixation. On login and logout, regenerate the session id and clear the
-token so the next `issue()` mints a fresh one bound to the new session:
+session fixation. On login and logout, clear the token and regenerate the
+session id, so the next `issue()` mints a fresh one bound to the new session.
+`clear()` starts the session when none is active yet, so in this order
+`session_regenerate_id()` always has a session to work on:
 
 ```php
 // $csrf is an injected CsrfTokenInterface
-session_regenerate_id(true);
 $csrf->clear();   // drop the old token
+session_regenerate_id(true);
 $csrf->issue();   // mint a fresh token for the new session
 ```
 
