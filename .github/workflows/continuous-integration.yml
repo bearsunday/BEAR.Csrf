@@ -67,11 +67,45 @@ jobs:
       - name: Run test suite
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
 
+      - name: Keep the coverage report for the union gate
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.php-version }}
+          path: coverage.xml
+          retention-days: 1
+
+      # Corroboration, not the gate. The gate is the coverage job below, which does not
+      # depend on a third-party upload: this one failed silently for a month after the
+      # repository transfer, and a gate that can be disabled without a red build is none.
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           use_oidc: true
           files: coverage.xml
-          # codecov.yml demands 100%. A gate whose upload can fail silently is no
-          # gate: the transfer disabled it for a month without a red build.
-          fail_ci_if_error: true
+          fail_ci_if_error: false
+
+  coverage:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Collect the per-leg reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: reports
+
+      # One leg cannot reach 100% alone: the coroutine guard in SessionCsrfStore has a
+      # branch for each answer to "is Swoole loaded?", and the matrix gives one answer
+      # per leg. The union across legs must cover every line.
+      - name: Require 100% across the matrix
+        run: php .github/scripts/coverage-union.php reports/*/coverage.xml
