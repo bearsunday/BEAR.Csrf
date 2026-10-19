@@ -52,6 +52,7 @@ $this->install(CsrfModule::withSameOriginCheck(
 ```php
 use BEAR\Csrf\Attribute\CsrfToken;
 use BEAR\Csrf\Attribute\SameOrigin;
+use BEAR\Resource\ResourceObject;
 
 class Article extends ResourceObject
 {
@@ -99,11 +100,14 @@ BEAR.Resource requests, HTML forms, and JavaScript submissions.
 The header name is fixed and exposed as `HeaderRequestToken::HEADER_NAME`; it is **not**
 affected by `tokenField`, which only the query and `$_POST` sources use.
 
-Avoid the query-string source for browser-facing requests: a token placed in the
-URL can leak through server access logs, the `Referer` header, browser history,
-and shared or bookmarked links. Prefer the `X-CSRF-Token` header or the `$_POST`
-body for browser submissions, and reserve `uri->query` for server-side
-BEAR.Resource requests whose URI is never exposed to a browser.
+The first source that holds a non-empty value wins; sources are never combined,
+so a wrong header token is not rescued by a correct `$_POST` token.
+
+BEAR.Sunday's web router fills `uri->query` from `$_POST` on POST and from the
+form-encoded or JSON request body on PUT, PATCH and DELETE, so a browser form
+submission or a JSON body is read by the second source. Never put the token in
+the URL query string: a token placed in the URL can leak through server access
+logs, the `Referer` header, browser history, and shared or bookmarked links.
 
 ## Template example
 
