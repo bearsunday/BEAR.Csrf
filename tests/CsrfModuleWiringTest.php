@@ -6,8 +6,8 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
-use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\ArmedOriginModule;
+use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
 use BEAR\Csrf\Fake\WiredResource;
