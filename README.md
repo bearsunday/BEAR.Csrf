@@ -71,7 +71,24 @@ The Resource must not be `final`. Ray.Aop applies both gates by subclassing,
 and Ray.Di silently skips a `final` class, so its methods run unprotected.
 
 `#[SameOrigin]` validates browser origin signals (`Sec-Fetch-Site`, `Origin`,
-`Referer`), and runs only under `withSameOriginCheck()`.
+`Referer`). It is armed by the `AllowedOrigin` binding: `withSameOriginCheck()`
+binds the origin you pass, `withoutSameOriginCheck()` binds `null`, and a null
+origin makes the interceptor proceed without checking.
+
+That binding is an extension point. A BEAR.Sunday application composes
+contexts over a neutral `AppModule`, so the module that knows the canonical
+origin is often not the one installing `CsrfModule`. Install
+`withoutSameOriginCheck()` in the shared module, then have the context that
+owns the origin rebind `AllowedOrigin` — a production module reading it from
+the environment, a test harness naming the origin it is about to send:
+
+```php
+// ProdModule
+$this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin($origin));
+```
+
+The interceptor stays bound either way; only the value decides. That is a
+contract, not an implementation detail, and a test pins it.
 
 When `Sec-Fetch-Site` is present (all modern browsers send it), the request is
 judged by that browser-computed signal alone and the allowed origin is not

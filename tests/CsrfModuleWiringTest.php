@@ -7,6 +7,7 @@ namespace BEAR\Csrf;
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
 use BEAR\Csrf\Fake\RenamedFieldModule;
+use BEAR\Csrf\Fake\ArmedOriginModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
 use BEAR\Csrf\Fake\WiredResource;
@@ -93,6 +94,35 @@ final class CsrfModuleWiringTest extends TestCase
         $this->expectException(MissingCsrfTokenForbiddenException::class);
 
         $this->resource(new TokenGateOnlyModule())->onPost();
+    }
+
+    /**
+     * A context module that knows the origin arms the gate by rebinding AllowedOrigin over
+     * withoutSameOriginCheck(). The interceptor must stay bound for this to work; if a
+     * future change stopped binding it under withoutSameOriginCheck(), every consumer
+     * composing contexts this way would lose the gate silently.
+     */
+    public function testContextModuleArmsTheOriginGateByRebindingAllowedOrigin(): void
+    {
+        $_SERVER['HTTP_SEC_FETCH_SITE'] = 'cross-site';
+        $module = new TokenGateOnlyModule();
+        $module->override(new ArmedOriginModule('https://example.com'));
+
+        $this->expectException(CrossOriginForbiddenException::class);
+
+        $this->resource($module)->onDelete();
+    }
+
+    public function testRebindingAllowedOriginStillAdmitsSameOriginRequests(): void
+    {
+        $_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
+        $module = new TokenGateOnlyModule();
+        $module->override(new ArmedOriginModule('https://example.com'));
+
+        $body = $this->resource($module)->onDelete()->body;
+
+        $this->assertIsArray($body);
+        $this->assertSame('ok', $body['result']);
     }
 
     /** The field a template renders is the one the interceptor reads: both come from the module. */

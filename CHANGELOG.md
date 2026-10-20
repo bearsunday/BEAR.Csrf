@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rebinding `AllowedOrigin` over `withoutSameOriginCheck()` is now a documented
+  contract for context modules, pinned by a test. The README had said
+  `#[SameOrigin]` runs only under `withSameOriginCheck()`, which left a
+  consumer composing contexts over a neutral application module — the first
+  one did, be-framework/BeMart#160 — depending on an implementation detail the
+  documentation allowed to change.
+
 ## [0.1.0] - 2026-10-20
 
 First release. CSRF defence for BEAR.Sunday, applied by attribute and bound by
