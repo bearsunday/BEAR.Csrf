@@ -6,13 +6,13 @@ namespace BEAR\Csrf;
 
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
-use BEAR\Csrf\Fake\ArmedOriginModule;
 use BEAR\Csrf\Fake\ArmingContextModule;
 use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
 use BEAR\Csrf\Fake\WiredResource;
 use BEAR\Csrf\Html\CsrfHiddenInput;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -98,8 +98,8 @@ final class CsrfModuleWiringTest extends TestCase
     }
 
     /**
-     * A context module that knows the origin arms the gate by rebinding AllowedOrigin over
-     * withoutSameOriginCheck(). The interceptor must stay bound for this to work; if a
+     * A context module that knows the origin arms the gate by installing SameOriginModule
+     * over withoutSameOriginCheck(). The interceptor must stay bound for this to work; if a
      * future change stopped binding it under withoutSameOriginCheck(), every consumer
      * composing contexts this way would lose the gate silently.
      */
@@ -107,7 +107,7 @@ final class CsrfModuleWiringTest extends TestCase
     {
         $_SERVER['HTTP_SEC_FETCH_SITE'] = 'cross-site';
         $module = new TokenGateOnlyModule();
-        $module->override(new ArmedOriginModule('https://example.com'));
+        $module->override(new SameOriginModule('https://example.com'));
 
         $this->expectException(CrossOriginForbiddenException::class);
 
@@ -118,7 +118,7 @@ final class CsrfModuleWiringTest extends TestCase
     {
         $_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
         $module = new TokenGateOnlyModule();
-        $module->override(new ArmedOriginModule('https://example.com'));
+        $module->override(new SameOriginModule('https://example.com'));
 
         $body = $this->resource($module)->onDelete()->body;
 
@@ -138,6 +138,18 @@ final class CsrfModuleWiringTest extends TestCase
         $this->expectException(CrossOriginForbiddenException::class);
 
         $this->resource(new ArmingContextModule('https://example.com', new TokenGateOnlyModule()))->onDelete();
+    }
+
+    /**
+     * CsrfTokenField rejects a name that cannot survive submission in its own constructor,
+     * before it is ever bound. SameOriginModule matches that: a malformed origin fails at
+     * wiring time, not on the first #[SameOrigin] request that reaches the interceptor.
+     */
+    public function testSameOriginModuleRejectsAMalformedOriginAtConstruction(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new SameOriginModule('https://example.com/path');
     }
 
     /** The field a template renders is the one the interceptor reads: both come from the module. */

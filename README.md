@@ -79,12 +79,13 @@ That binding is an extension point. A BEAR.Sunday application composes
 contexts over a neutral `AppModule`, so the module that knows the canonical
 origin is often not the one installing `CsrfModule`. Install
 `withoutSameOriginCheck()` in the shared module, then have the context that
-owns the origin rebind `AllowedOrigin` — a production module reading it from
-the environment, a test harness naming the origin it is about to send:
+owns the origin install `SameOriginModule`, which rebinds `AllowedOrigin` — a
+production module reading it from the environment, a test harness naming the
+origin it is about to send:
 
 ```php
 // ProdModule
-$this->bind(AllowedOrigin::class)->toInstance(new AllowedOrigin($origin));
+$this->install(new SameOriginModule($_ENV['APP_ORIGIN']));
 ```
 
 The interceptor stays bound either way; only the value decides. That is a

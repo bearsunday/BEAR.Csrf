@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BEAR\Csrf\Fake;
 
+use BEAR\Csrf\SameOriginModule;
 use Override;
 use Ray\Di\AbstractModule;
 
@@ -23,6 +24,6 @@ final class ArmingContextModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $this->install(new ArmedOriginModule($this->origin));
+        $this->install(new SameOriginModule($this->origin));
     }
 }
