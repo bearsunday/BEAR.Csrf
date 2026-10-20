@@ -7,6 +7,7 @@ namespace BEAR\Csrf;
 use BEAR\Csrf\Exception\CrossOriginForbiddenException;
 use BEAR\Csrf\Exception\MissingCsrfTokenForbiddenException;
 use BEAR\Csrf\Fake\ArmedOriginModule;
+use BEAR\Csrf\Fake\ArmingContextModule;
 use BEAR\Csrf\Fake\RenamedFieldModule;
 use BEAR\Csrf\Fake\TestCsrfModule;
 use BEAR\Csrf\Fake\TokenGateOnlyModule;
@@ -123,6 +124,20 @@ final class CsrfModuleWiringTest extends TestCase
 
         $this->assertIsArray($body);
         $this->assertSame('ok', $body['result']);
+    }
+
+    /**
+     * The same contract through the path a real context module takes: constructed over the
+     * shared module and installing the rebind from its own configure(). Ray.Di resolves
+     * override() and parent-wrapping differently, so both shapes are pinned.
+     */
+    public function testContextModuleWrappingTheSharedModuleArmsTheOriginGate(): void
+    {
+        $_SERVER['HTTP_SEC_FETCH_SITE'] = 'cross-site';
+
+        $this->expectException(CrossOriginForbiddenException::class);
+
+        $this->resource(new ArmingContextModule('https://example.com', new TokenGateOnlyModule()))->onDelete();
     }
 
     /** The field a template renders is the one the interceptor reads: both come from the module. */
