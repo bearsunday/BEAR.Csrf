@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-22
+
 ### Added
 
 - `SameOriginModule($origin)` — the arming module itself, shipped so a context
@@ -82,5 +84,6 @@ method signature.
 - A protected Resource must not be `final`. Ray.Di weaves by subclassing and
   skips a `final` class without any error, which leaves both gates off.
 
-[Unreleased]: https://github.com/bearsunday/BEAR.Csrf/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/bearsunday/BEAR.Csrf/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/bearsunday/BEAR.Csrf/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/bearsunday/BEAR.Csrf/releases/tag/0.1.0
