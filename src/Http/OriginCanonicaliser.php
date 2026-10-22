@@ -15,6 +15,8 @@ use function strtolower;
  * configured `AllowedOrigin`, the `Origin` header, and the `Referer` header alike. Extracted
  * so a module can validate a configured origin before it is bound, instead of only at the
  * first request that reaches the interceptor.
+ *
+ * @internal Shared by SameOriginInterceptor and SameOriginModule; not part of the public API.
  */
 final class OriginCanonicaliser
 {
