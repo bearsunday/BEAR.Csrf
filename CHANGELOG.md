@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SameOriginModule($origin)` — the arming module itself, shipped so a context
   module rebinds `AllowedOrigin` by installing a package class instead of
-  writing its own. (#11)
+  writing its own. A malformed origin throws `InvalidArgumentException` at
+  construction rather than on the first `#[SameOrigin]` request. (#11)
 
 ### Changed
 
