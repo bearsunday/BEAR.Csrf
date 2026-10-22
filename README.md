@@ -84,7 +84,9 @@ production module reading it from the environment, a test harness naming the
 origin it is about to send:
 
 ```php
-// ProdModule
+use BEAR\Csrf\SameOriginModule;
+
+// ProdModule::configure()
 $this->install(new SameOriginModule($_ENV['APP_ORIGIN']));
 ```
 
