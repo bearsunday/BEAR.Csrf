@@ -7,7 +7,8 @@ namespace BEAR\Csrf\Attribute;
 use Attribute;
 
 /**
- * Rejects a request that is not same-origin, judged by Sec-Fetch-Site, then Origin, then Referer
+ * Rejects a request that is not same-origin: Sec-Fetch-Site decides when present, else Origin, else Referer
+ *
  * Checks nothing while AllowedOrigin is null (CsrfModule::withoutSameOriginCheck())
  *
  * @see https://bearsunday.github.io/manuals/1.0/en/csrf.html#resource-attributes
