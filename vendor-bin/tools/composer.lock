@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1b0d01c24dd86e4370e6931168da979",
+    "content-hash": "c2623938a6af2edff30b79e71a54c216",
     "packages": [],
     "packages-dev": [
         {
@@ -2461,7 +2461,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-05T09:00:01+00:00"
+            "time": "2026-06-05T09:00:01+00:00",
+            "published-time": "2026-06-05T09:00:18+00:00"
         },
         {
             "name": "psalm/plugin-phpunit",
@@ -4828,13 +4829,16 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "doctrine/coding-standard": 20,
-        "phpmd/phpmd": 20,
         "pdepend/pdepend": 20,
+        "phpmd/phpmd": 20,
         "phpmetrics/phpmetrics": 5
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "platform": {},
+    "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.4.99"
+    },
+    "plugin-api-version": "2.11.0"
 }

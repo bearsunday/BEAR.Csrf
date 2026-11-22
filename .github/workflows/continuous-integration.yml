@@ -25,6 +25,8 @@ jobs:
           - '8.2'
           - '8.3'
           - '8.4'
+          - '8.5'
+          - '8.6'
         # SessionCsrfToken's coroutine guard has a branch for each answer to "is Swoole
         # loaded?". One leg without the extension keeps the absent branch reachable; with it
         # on every leg, the guard's early return is dead code and coverage never reaches 100%.
@@ -34,6 +36,10 @@ jobs:
           - php-version: '8.3'
             extensions: swoole
           - php-version: '8.4'
+            extensions: swoole
+          - php-version: '8.5'
+            extensions: swoole
+          - php-version: '8.6'
             extensions: swoole
     steps:
       - name: Checkout
